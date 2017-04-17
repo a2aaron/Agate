@@ -16,6 +16,12 @@ use values::Value;
 // closure needs to know what func it's supposted be in
 
 
+struct State<'a> {
+    registers: Vec<Register>,
+    stackFrames: Vec<StackFrame<'a>>,
+    program_counter: usize,
+}
+
 /// A stack frame consists of a function (really a reference), a counter which
 /// tracks where in the function the execution is, the variables the function 
 /// needs (this includes any closure or local variables)
