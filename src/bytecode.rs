@@ -86,6 +86,52 @@ enum MathOp {
     XOR,
 }
 
+fn step<'a>(mut state: State, instr: Instruction) {
+    use self::Instruction::*;
+    match instr {
+        MathOp {op, left, right, out} => {
+            use self::MathOp::*;
+            match op {
+                Add => state.registers[out] = state.registers[left] + state.registers[right],
+                Sub => state.registers[out] = state.registers[left] - state.registers[right],
+                Mul => state.registers[out] = state.registers[left] * state.registers[right],
+                Div => state.registers[out] = state.registers[left] / state.registers[right],
+                Mod => state.registers[out] = state.registers[left] % state.registers[right],
+                AND => state.registers[out] = state.registers[left] & state.registers[right],
+                OR => state.registers[out] = state.registers[left] | state.registers[right],
+                XOR => state.registers[out] = state.registers[left] ^ state.registers[right],
+            }
+        },
+        Store(index, value) => {
+            state.registers[index] = value
+        },
+        Move {from, to} => {
+            state.registers[to] = state.registers[from]
+        },
+        Function => unimplemented!(),
+        Return => unimplemented!(),
+        Closure => unimplemented!(),
+        Jump(distance) => {
+            state.program_counter += distance
+        },
+        JumpIf {op, left, right, distance} => {
+            use self::CompareOp::*;
+            let should_jump: bool;
+            match op {
+                Equals => should_jump = left == right,
+                LessThan => should_jump = left < right,
+                GreaterThan => should_jump = left > right,
+                LessOrEqualTo => should_jump = left <= right,
+                GreaterOrEqualTo => should_jump = left >= right,
+            }
+
+            if should_jump {
+                state.program_counter += distance
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     fn it_words() {
