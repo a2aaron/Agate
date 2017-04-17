@@ -23,8 +23,8 @@ use values::Value;
 struct StackFrame<'a> {
     function: &'a Function,
     function_counter: usize,
-    args: Vec<Value>,
-    locals: Vec<Value>,
+    args: Vec<Register>,
+    locals: Vec<Register>,
     closures: Vec<ClosureValue>,
 }
 
@@ -41,21 +41,22 @@ type ClosureValue = Value;
 
 /// A Register simply holds a number
 type Register = i32;
-
+/// Registers are named simply as "Register" and then a number
+type RegisterIndex = usize;
 #[derive(Debug)]
 enum Instruction {
     // Preform math on two registers, storing the result into a third register
-    TwoOp {op: TwoOp, left: Register, right: Register, out: Register},
+    MathOp {op: MathOp, left: RegisterIndex, right: RegisterIndex, out: RegisterIndex},
     // Store value into the specified register
-    Store(Register, i32),
+    Store(RegisterIndex, i32),
     // Move a value from a register into another
-    Move {from: Register, to: Register},
+    Move {from: RegisterIndex, to: RegisterIndex},
     Function, /* @TODO figure out function symbols and other stuff */
     Return, /* @TODO either a number or a pointer to a stack frame goes here */
     Closure, /* @TODO i have no idea what this would look like */
-    Jump(i32), // Jump (relative)
+    Jump(usize), // Jump (relative)
     // Compare two registers, if the result is true then jump
-    JumpIf {op: CompareOp, left: Register, right: Register, jump: i32},
+    JumpIf {op: CompareOp, left: RegisterIndex, right: RegisterIndex, distance: usize},
 }
 
 #[derive(Debug)]
@@ -68,7 +69,7 @@ enum CompareOp {
 }
 
 #[derive(Debug)]
-enum TwoOp {
+enum MathOp {
     Add,
     Sub,
     Mul,
